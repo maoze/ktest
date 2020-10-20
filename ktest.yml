@@ -1,0 +1,56 @@
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: kt
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - watch
+  - list
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: kt
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kt
+subjects:
+- kind: ServiceAccount
+  name: kt
+  namespace: kube-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kt
+  namespace: kube-system
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kube-kt-ds
+  namespace: kube-system
+  labels:
+    tier: node
+    app: kt
+spec:
+  selector:
+    matchLabels:
+      app: kt
+  template:
+    metadata:
+      labels:
+        tier: node
+        app: kt
+    spec:
+      serviceAccountName: kt
+      containers:
+      - name: kube-kt
+        image: maoze/kt
